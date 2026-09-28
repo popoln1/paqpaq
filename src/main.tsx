@@ -16,23 +16,24 @@ const packs:Pack[]=[
 const euro=(n:number)=>n.toFixed(2).replace('.',',')+' €';
 
 function MiniSleeve({i=0}:{i?:number}){
-  const colors=['#e84b36','#1d78a6','#e6ce3b','#111','#6f8f5c','#d58a9a'];
-  return <span className="mini-sleeve" style={{background:'linear-gradient(145deg,'+colors[i%colors.length]+' 0 48%,#f5f2eb 48% 66%,'+colors[(i+2)%colors.length]+' 66%)',transform:'rotate('+((i%5-2)*4)+'deg)'}}/>;
+  const colors=['#e84b36','#1d78a6','#e6ce3b','#111','#6f8f5c','#d58a9a','#f08b35','#315f8f'];
+  return <span className="mini-sleeve" style={{background:'linear-gradient(145deg,'+colors[i%colors.length]+' 0 46%,#f7f1df 46% 63%,'+colors[(i+2)%colors.length]+' 63%)',transform:'rotate('+((i%5-2)*4)+'deg)'}}><i/></span>;
 }
 
 function PackArt({pack,hero=false}:{pack:Pack;hero?:boolean}){
-  if(hero)return <div className="hero-products"><MiniSleeve i={1}/><MiniSleeve i={3}/><MiniSleeve i={0}/></div>;
-  const count=pack.pattern==='small'?3:pack.pattern==='medium'?6:pack.pattern==='bundle'?10:pack.pattern==='large'?18:pack.pattern==='xl'?27:38;
+  if(hero)return <div className="hero-products"><div className="hero-floor"/><MiniSleeve i={1}/><MiniSleeve i={3}/><MiniSleeve i={0}/></div>;
+  const count=pack.pattern==='small'?3:pack.pattern==='medium'?6:pack.pattern==='bundle'?10:pack.pattern==='large'?18:pack.pattern==='xl'?28:42;
   return <div className={'pack-art '+pack.pattern}>
+    <div className="pack-coffret"><span className="coffret-front">PAQPAQ</span><span className="coffret-side"/></div>
     <div className="pack-stack">{Array.from({length:count},(_,i)=><MiniSleeve key={i} i={i}/>)}</div>
-    {pack.free&&<b className="free-badge">{pack.free}</b>}
+    {pack.free&&<b className="free-badge">{pack.free}<small>OFFERT</small></b>}
   </div>
 }
 
 function ProductCard({pack,onAdd}:{pack:Pack;onAdd:(p:Pack)=>void}){
   return <article className="pack-card">
     <div className="pack-image"><PackArt pack={pack}/></div>
-    <div className="pack-info"><div><h3>{pack.label}</h3><p>{pack.sub}</p></div><strong>{euro(pack.price)}</strong></div>
+    <div className="pack-info"><div><h3>{pack.label}{pack.free&&<small> (9 + 1 OFFERT)</small>}</h3><p>{pack.sub}</p></div><strong>{euro(pack.price)}</strong></div>
     <button className="add-button" onClick={()=>onAdd(pack)}>AJOUTER AU PANIER <span>→</span></button>
   </article>
 }
@@ -75,8 +76,8 @@ function App(){
         <div className="hero-copy">
           <span className="eyebrow">DES ÉTUIS. DES ARTISTES. UNE SEULE COMMUNAUTÉ.</span>
           <h1>CHOISISSEZ<br/>VOTRE PACK</h1>
-          <p>Plus vous achetez, plus vous économisez.<br/>Trouvez le pack qui vous correspond et recevez vos étuis directement chez vous.</p>
-          <a className="hero-button" href="#packs">DÉCOUVRIR LES ÉTUIS <span>→</span></a>
+          <p>Plus vous achetez, plus vous économisez.</p>
+          <a className="hero-button" href="#packs">DÉCOUVRIR LES PACKS <span>→</span></a>
         </div>
         <div className="hero-art">
           <PackArt pack={packs[0]} hero/>
@@ -88,7 +89,6 @@ function App(){
       <section id="packs" className="packs-section">
         <div className="section-label"><h2>LES PACKS LES MOINS CHERS</h2><span>PETITS PRIX, GRAND PLAISIR</span></div>
         <div className="pack-grid">{packs.slice(0,3).map(p=><ProductCard key={p.id} pack={p} onAdd={add}/>)}</div>
-
         <div className="section-label second"><h2>LES PACKS LES PLUS CHERS</h2><span>PLUS DE CRÉATIONS, PLUS D'ÉCONOMIES</span></div>
         <div className="pack-grid">{packs.slice(3).map(p=><ProductCard key={p.id} pack={p} onAdd={add}/>)}</div>
       </section>
