@@ -1,5 +1,6 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
+import catalogImage from './assets/touteslesimagesenunseulfichier.png';
 import './styles.css';
 
 type Pack={id:number;qty:number;price:number;label:string;sub:string;accent:string;pattern:string;free?:string};
@@ -15,19 +16,9 @@ const packs:Pack[]=[
 
 const euro=(n:number)=>n.toFixed(2).replace('.',',')+' €';
 
-function MiniSleeve({i=0}:{i?:number}){
-  const colors=['#e84b36','#1d78a6','#e6ce3b','#111','#6f8f5c','#d58a9a','#f08b35','#315f8f'];
-  return <span className="mini-sleeve" style={{background:'linear-gradient(145deg,'+colors[i%colors.length]+' 0 46%,#f7f1df 46% 63%,'+colors[(i+2)%colors.length]+' 63%)',transform:'rotate('+((i%5-2)*4)+'deg)'}}><i/></span>;
-}
-
 function PackArt({pack,hero=false}:{pack:Pack;hero?:boolean}){
-  if(hero)return <div className="hero-products"><div className="hero-floor"/><MiniSleeve i={1}/><MiniSleeve i={3}/><MiniSleeve i={0}/></div>;
-  const count=pack.pattern==='small'?3:pack.pattern==='medium'?6:pack.pattern==='bundle'?10:pack.pattern==='large'?18:pack.pattern==='xl'?28:42;
-  return <div className={'pack-art '+pack.pattern}>
-    <div className="pack-coffret"><span className="coffret-front">PAQPAQ</span><span className="coffret-side"/></div>
-    <div className="pack-stack">{Array.from({length:count},(_,i)=><MiniSleeve key={i} i={i}/>)}</div>
-    {pack.free&&<b className="free-badge">{pack.free}<small>OFFERT</small></b>}
-  </div>
+  if(hero)return <div className="hero-photo" style={{backgroundImage:'url('+catalogImage+')'}} aria-label="Étuis PAQPAQ de démonstration"/>;
+  return <div className={'pack-art image-pack image-pack-'+pack.id} style={{backgroundImage:'url('+catalogImage+')'}} aria-label={pack.label+' PAQPAQ'}>{pack.free&&<b className="free-badge">+1<small>OFFERT</small></b>}</div>;
 }
 
 function ProductCard({pack,onAdd}:{pack:Pack;onAdd:(p:Pack)=>void}){
