@@ -2,130 +2,119 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import './styles.css';
 
-type Product = {
-  id:number; name:string; artist:string; region:string; price:number; tag?:string;
-  image:string; colors:string[]; description:string;
-};
+type Pack={id:number;qty:number;price:number;label:string;sub:string;accent:string;pattern:string;free?:string};
 
-const products:Product[] = [
-  {id:1,name:'Méli-Mélo #01',artist:'PAQPAQ Studio',region:'France',price:15.9,tag:'BEST-SELLER',image:'linear-gradient(135deg,#111 0 24%,#f2cf32 24% 47%,#e74b32 47% 69%,#f4efe7 69%)',colors:['#111','#e74b32','#f2cf32'],description:'Un assortiment surprise de créations graphiques PAQPAQ.'},
-  {id:2,name:'Face à face',artist:'Camille R.',region:'Bordeaux · Gironde',price:6.9,image:'linear-gradient(145deg,#e9d8bf 0 36%,#173d75 36% 61%,#df4b38 61% 78%,#171717 78%)',colors:['#173d75','#df4b38','#e9d8bf'],description:'Une composition graphique inspirée du portrait et du mouvement.'},
-  {id:3,name:'Énergie brute',artist:'Léo M.',region:'Lyon · Rhône',price:6.9,image:'linear-gradient(125deg,#151515 0 31%,#f1d43c 31% 51%,#df3e36 51% 71%,#1976a9 71%)',colors:['#151515','#f1d43c','#df3e36'],description:'Couleurs franches, formes libres et énergie urbaine.'},
-  {id:4,name:'Botanique #02',artist:'Nina P.',region:'Paris · Île-de-France',price:6.9,image:'linear-gradient(140deg,#eee5cf 0 40%,#76945a 40% 58%,#d58a9a 58% 73%,#202d24 73%)',colors:['#76945a','#d58a9a','#eee5cf'],description:'Une interprétation contemporaine du végétal.'},
-  {id:5,name:'Rouge Signal',artist:'Alex B.',region:'Marseille · Bouches-du-Rhône',price:6.9,image:'linear-gradient(120deg,#e64b32 0 42%,#f4efe7 42% 58%,#111 58% 77%,#e7cf3d 77%)',colors:['#e64b32','#111','#e7cf3d'],description:'Un objet graphique vif et minimal.'},
-  {id:6,name:'Bleu Nuit',artist:'Sam D.',region:'Nantes · Loire-Atlantique',price:6.9,image:'linear-gradient(135deg,#142d4f 0 35%,#f0d13b 35% 52%,#f4efe7 52% 72%,#d94b38 72%)',colors:['#142d4f','#f0d13b','#d94b38'],description:'Contrastes nocturnes et formes géométriques.'},
-  {id:7,name:'Formes #04',artist:'Emma L.',region:'Toulouse · Haute-Garonne',price:6.9,image:'linear-gradient(145deg,#f4efe7 0 27%,#e84a32 27% 49%,#202020 49% 67%,#6f8f5c 67%)',colors:['#e84a32','#202020','#6f8f5c'],description:'Un jeu de formes et de matières pensé pour le format poche.'},
-  {id:8,name:'Pop Pocket',artist:'PAQPAQ Studio',region:'France',price:6.9,image:'linear-gradient(125deg,#f2cf32 0 29%,#1976a9 29% 49%,#e74b32 49% 72%,#111 72%)',colors:['#f2cf32','#1976a9','#e74b32'],description:'Une création pop conçue pour accompagner tous les jours.'}
+const packs:Pack[]=[
+  {id:1,qty:3,price:12,label:'3 ÉTUIS',sub:'3 créations uniques',accent:'#e84b36',pattern:'small'},
+  {id:2,qty:6,price:22,label:'6 ÉTUIS',sub:'6 créations uniques',accent:'#e6ce3b',pattern:'medium'},
+  {id:3,qty:10,price:30,label:'10 ÉTUIS',sub:'9 + 1 offert',accent:'#1d78a6',pattern:'bundle',free:'+1'},
+  {id:4,qty:20,price:55,label:'20 ÉTUIS',sub:'20 créations uniques',accent:'#111',pattern:'large'},
+  {id:5,qty:50,price:120,label:'50 ÉTUIS',sub:'50 créations uniques',accent:'#e84b36',pattern:'xl'},
+  {id:6,qty:100,price:200,label:'100 ÉTUIS',sub:'100 créations uniques',accent:'#111',pattern:'mass'}
 ];
 
 const euro=(n:number)=>n.toFixed(2).replace('.',',')+' €';
 
-function ProductVisual({p,large=false}:{p:Product;large?:boolean}){
-  return <div className={large?'product-visual large':'product-visual'} style={{background:p.image}}>
-    <span className="visual-logo">PAQPAQ</span>
-    <span className="visual-number">0{p.id}</span>
-    <span className="visual-art">ART<br/>IN<br/>POCKET</span>
+function MiniSleeve({i=0}:{i?:number}){
+  const colors=['#e84b36','#1d78a6','#e6ce3b','#111','#6f8f5c','#d58a9a'];
+  return <span className="mini-sleeve" style={{background:'linear-gradient(145deg,'+colors[i%colors.length]+' 0 48%,#f5f2eb 48% 66%,'+colors[(i+2)%colors.length]+' 66%)',transform:'rotate('+((i%5-2)*4)+'deg)'}}/>;
+}
+
+function PackArt({pack,hero=false}:{pack:Pack;hero?:boolean}){
+  if(hero)return <div className="hero-products"><MiniSleeve i={1}/><MiniSleeve i={3}/><MiniSleeve i={0}/></div>;
+  const count=pack.pattern==='small'?3:pack.pattern==='medium'?6:pack.pattern==='bundle'?10:pack.pattern==='large'?18:pack.pattern==='xl'?27:38;
+  return <div className={'pack-art '+pack.pattern}>
+    <div className="pack-stack">{Array.from({length:count},(_,i)=><MiniSleeve key={i} i={i}/>)}</div>
+    {pack.free&&<b className="free-badge">{pack.free}</b>}
   </div>
 }
 
-function ProductCard({p,onOpen}:{p:Product;onOpen:(p:Product)=>void}){
-  return <article className="product-card" onClick={()=>onOpen(p)}>
-    <div className="product-media">
-      {p.tag&&<span className="badge">{p.tag}</span>}
-      <ProductVisual p={p}/>
-      <button className="quick-add" onClick={e=>{e.stopPropagation();onOpen(p)}}>Voir le produit</button>
-    </div>
-    <div className="product-meta">
-      <div><h3>{p.name}</h3><p>{p.artist}</p></div><strong>{euro(p.price)}</strong>
-    </div>
+function ProductCard({pack,onAdd}:{pack:Pack;onAdd:(p:Pack)=>void}){
+  return <article className="pack-card">
+    <div className="pack-image"><PackArt pack={pack}/></div>
+    <div className="pack-info"><div><h3>{pack.label}</h3><p>{pack.sub}</p></div><strong>{euro(pack.price)}</strong></div>
+    <button className="add-button" onClick={()=>onAdd(pack)}>AJOUTER AU PANIER <span>→</span></button>
   </article>
 }
 
 function App(){
-  const [selected,setSelected]=React.useState<Product|null>(null);
-  const [cart,setCart]=React.useState<{product:Product;qty:number}[]>([]);
-  const [search,setSearch]=React.useState(false);
-  const [query,setQuery]=React.useState('');
+  const [cart,setCart]=React.useState<{pack:Pack;qty:number}[]>([]);
   const [cartOpen,setCartOpen]=React.useState(false);
+  const [searchOpen,setSearchOpen]=React.useState(false);
+  const [query,setQuery]=React.useState('');
   const [menu,setMenu]=React.useState(false);
 
-  const add=(p:Product)=>{
-    setCart(items=>items.some(x=>x.product.id===p.id)
-      ? items.map(x=>x.product.id===p.id?{...x,qty:x.qty+1}:x)
-      : [...items,{product:p,qty:1}]);
+  const add=(pack:Pack)=>{
+    setCart(items=>items.some(x=>x.pack.id===pack.id)
+      ?items.map(x=>x.pack.id===pack.id?{...x,qty:x.qty+1}:x)
+      :[...items,{pack,qty:1}]);
+    setCartOpen(true);
   };
-  const change=(id:number,delta:number)=>setCart(items=>items.map(x=>x.product.id===id?{...x,qty:Math.max(0,x.qty+delta)}:x).filter(x=>x.qty>0));
+  const change=(id:number,delta:number)=>setCart(items=>items.map(x=>x.pack.id===id?{...x,qty:Math.max(0,x.qty+delta)}:x).filter(x=>x.qty>0));
   const count=cart.reduce((n,x)=>n+x.qty,0);
-  const total=cart.reduce((n,x)=>n+x.product.price*x.qty,0);
-  const filtered=products.filter(p=>(p.name+' '+p.artist+' '+p.region).toLowerCase().includes(query.toLowerCase()));
+  const total=cart.reduce((n,x)=>n+x.pack.price*x.qty,0);
+  const results=packs.filter(p=>(p.label+' '+p.sub).toLowerCase().includes(query.toLowerCase()));
 
   return <div className="app">
-    <div className="announcement">LIVRAISON OFFERTE DÈS 35 € · COLLECTION 01 DISPONIBLE</div>
     <header className="nav">
       <button className="mobile-menu" onClick={()=>setMenu(!menu)}>☰</button>
       <a className="logo" href="#">PAQPAQ<span>®</span></a>
       <nav className={menu?'open':''}>
-        <a href="#shop" onClick={()=>setMenu(false)}>SHOP</a>
-        <a href="#collections" onClick={()=>setMenu(false)}>COLLECTIONS</a>
-        <a href="#discover" onClick={()=>setMenu(false)}>DÉCOUVRIR</a>
-        <a href="#create" onClick={()=>setMenu(false)}>CRÉER</a>
+        <a href="#packs" onClick={()=>setMenu(false)}>SHOP</a>
+        <a href="#packs" onClick={()=>setMenu(false)}>LES PACKS</a>
         <a href="#about" onClick={()=>setMenu(false)}>À PROPOS</a>
       </nav>
       <div className="nav-actions">
-        <button onClick={()=>setSearch(true)} aria-label="Rechercher">⌕</button>
-        <button onClick={()=>setCartOpen(true)} className="cart-button">PANIER <span>{count}</span></button>
+        <button onClick={()=>setSearchOpen(true)} aria-label="Rechercher">⌕</button>
+        <button className="cart-button" onClick={()=>setCartOpen(true)}>PANIER <span>{count}</span></button>
       </div>
     </header>
 
     <main>
       <section className="hero">
         <div className="hero-copy">
-          <span className="eyebrow">OBJETS GRAPHIQUES · MADE IN FRANCE</span>
-          <h1>DE L’ART<br/><i>DANS VOTRE POCHE.</i></h1>
-          <p>Des étuis cartonnés réutilisables, imaginés avec des artistes et pensés comme de petits objets de collection.</p>
-          <a href="#shop" className="button">Shopper la collection</a>
-          <div className="hero-note"><span>01</span> COLLECTION 01 · 8 CRÉATIONS</div>
+          <span className="eyebrow">DES ÉTUIS. DES ARTISTES. UNE SEULE COMMUNAUTÉ.</span>
+          <h1>CHOISISSEZ<br/>VOTRE PACK</h1>
+          <p>Plus vous achetez, plus vous économisez.<br/>Trouvez le pack qui vous correspond et recevez vos étuis directement chez vous.</p>
+          <a className="hero-button" href="#packs">DÉCOUVRIR LES ÉTUIS <span>→</span></a>
         </div>
-        <div className="hero-stage">
-          <div className="hero-card back"></div><div className="hero-card mid"></div>
-          <div className="hero-card front"><span>PAQPAQ</span><b>01</b><small>ART<br/>IN<br/>POCKET</small></div>
-          <div className="hero-caption">PORTABLE<br/>ART OBJECT</div>
-        </div>
-      </section>
-
-      <section id="shop" className="section shop-section">
-        <div className="section-title"><div><span className="eyebrow">SHOP</span><h2>Les favoris du moment</h2></div><a href="#all">Voir toute la collection →</a></div>
-        <div className="grid">{products.slice(0,4).map(p=><ProductCard key={p.id} p={p} onOpen={setSelected}/>)}</div>
-      </section>
-
-      <section id="collections" className="collections section">
-        <div className="section-title"><div><span className="eyebrow">COLLECTIONS</span><h2>Choisissez votre univers.</h2></div></div>
-        <div className="collection-grid">
-          <a href="#shop" className="collection-card red"><span>01</span><h3>Graphique</h3><small>Formes · couleurs · contrastes</small></a>
-          <a href="#shop" className="collection-card yellow"><span>02</span><h3>Pop & street</h3><small>Énergie · lignes · caractère</small></a>
-          <a href="#shop" className="collection-card black"><span>03</span><h3>Minimal</h3><small>Simple · brut · contemporain</small></a>
+        <div className="hero-art">
+          <PackArt pack={packs[0]} hero/>
+          <div className="hero-doodle">PETITS ÉTUIS<br/>GRANDES<br/>ÉMOTIONS <b>♡</b></div>
+          <i className="scribble s1">╲╱</i><i className="scribble s2">✦</i>
         </div>
       </section>
 
-      <section className="feature section">
-        <div className="feature-copy"><span className="eyebrow">MÉLI-MÉLO</span><h2>Vous choisissez le nombre.<br/><i>Nous choisissons l’art.</i></h2><p>Un assortiment surprise de créations PAQPAQ. Parfait pour découvrir plusieurs artistes sans avoir à choisir.</p><div className="chips"><span>3 · 6,90 €</span><span>6 · 10,90 €</span><span>9 + 1 · 15,90 €</span><span>20 · 27,90 €</span></div><button className="button light">Choisir mon Méli-Mélo</button></div>
-        <div className="stack">{products.slice(0,4).map((p,i)=><div key={p.id} className="stack-item" style={{background:p.image,transform:'rotate('+((i-1.5)*6)+'deg) translate('+(i*12)+'px,'+(i*-7)+'px)'}}><span>PAQPAQ</span></div>)}</div>
+      <section id="packs" className="packs-section">
+        <div className="section-label"><h2>LES PACKS LES MOINS CHERS</h2><span>PETITS PRIX, GRAND PLAISIR</span></div>
+        <div className="pack-grid">{packs.slice(0,3).map(p=><ProductCard key={p.id} pack={p} onAdd={add}/>)}</div>
+
+        <div className="section-label second"><h2>LES PACKS LES PLUS CHERS</h2><span>PLUS DE CRÉATIONS, PLUS D'ÉCONOMIES</span></div>
+        <div className="pack-grid">{packs.slice(3).map(p=><ProductCard key={p.id} pack={p} onAdd={add}/>)}</div>
       </section>
 
-      <section id="discover" className="discover section">
-        <div className="discover-inner"><div><span className="eyebrow">DÉCOUVRIR</span><h2>Des artistes<br/>partout en France.</h2><p>Découvrez qui se cache derrière chaque création. Par région, département ou style.</p><a className="button dark" href="#shop">Explorer les artistes</a></div><div className="map-art"><span>FRANCE</span><i></i><i></i><i></i><i></i></div></div>
+      <section className="trust">
+        <div><b>♧</b><strong>LIVRAISON RAPIDE</strong><small>3 à 5 jours ouvrés</small></div>
+        <div><b>◇</b><strong>PAIEMENT SÉCURISÉ</strong><small>100% fiable</small></div>
+        <div><b>♢</b><strong>DES ARTISTES ENGAGÉS</strong><small>Création française</small></div>
+        <div><b>♡</b><strong>UNE COMMUNAUTÉ PASSIONNÉE</strong><small>Rejoignez l'aventure</small></div>
       </section>
-
-      <section id="create" className="create section"><span className="eyebrow">CRÉER SON PAQPAQ</span><h2>Votre art.<br/><i>Notre étui.</i></h2><p>Artistes, créateurs, bars, hôtels, festivals ou marques : imaginez votre série PAQPAQ.</p><a className="button" href="#">Commencer une création →</a></section>
     </main>
 
-    <footer id="about"><div><div className="logo">PAQPAQ<span>®</span></div><p>De l’art dans votre poche.</p></div><div className="footer-links"><a href="#">FAQ</a><a href="#">Livraison</a><a href="#">Contact</a><a href="#">Instagram</a></div><small>© 2026 PAQPAQ</small></footer>
+    <footer id="about">
+      <div className="footer-brand"><div className="logo">PAQPAQ<span>®</span></div><p>Des étuis. Des artistes.<br/>Une seule communauté.</p><small>© 2026 PAQPAQ. Tous droits réservés.</small></div>
+      <div className="footer-links"><a href="#">FAQ</a><a href="#">Livraison</a><a href="#">Retours</a><a href="#">Contact</a></div>
+      <div className="social"><span>◎</span><span>♪</span><span>▶</span></div>
+      <div className="newsletter"><strong>RESTEZ INFORMÉ</strong><div><input placeholder="Votre email"/><button>→</button></div></div>
+    </footer>
 
-    {selected&&<div className="overlay" onClick={()=>setSelected(null)}><div className="product-drawer" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setSelected(null)}>×</button><div className="drawer-grid"><ProductVisual p={selected} large/><div className="drawer-info"><span className="eyebrow">{selected.artist}</span><h2>{selected.name}</h2><p className="region">{selected.region}</p><p>{selected.description}</p><div className="drawer-price">{euro(selected.price)}</div><button className="button dark full" onClick={()=>{add(selected);setSelected(null);setCartOpen(true)}}>Ajouter au panier</button><small className="shipping">Expédition sous 2 à 4 jours ouvrés</small></div></div></div></div>}
+    {cartOpen&&<div className="overlay" onClick={()=>setCartOpen(false)}><aside className="cart-drawer" onClick={e=>e.stopPropagation()}>
+      <div className="drawer-head"><div><span className="eyebrow">PANIER</span><h2>Votre sélection</h2></div><button className="close" onClick={()=>setCartOpen(false)}>×</button></div>
+      {!cart.length?<div className="empty"><p>Votre panier est vide.</p><button className="hero-button" onClick={()=>{setCartOpen(false);document.getElementById('packs')?.scrollIntoView()}}>Découvrir les packs</button></div>:
+      <><div className="cart-list">{cart.map(x=><div className="cart-line" key={x.pack.id}><div className="cart-mini"><PackArt pack={x.pack}/></div><div className="cart-line-info"><strong>{x.pack.label}</strong><small>{x.pack.sub}</small><div className="qty"><button onClick={()=>change(x.pack.id,-1)}>−</button><span>{x.qty}</span><button onClick={()=>change(x.pack.id,1)}>+</button></div></div><b>{euro(x.pack.price*x.qty)}</b></div>)}</div><div className="cart-total"><span>Sous-total</span><strong>{euro(total)}</strong></div><button className="checkout">PASSER COMMANDE →</button><small className="cart-note">Le paiement Shopify sera connecté ensuite.</small></>}
+    </aside></div>}
 
-    {cartOpen&&<div className="overlay" onClick={()=>setCartOpen(false)}><aside className="cart-drawer" onClick={e=>e.stopPropagation()}><div className="drawer-head"><div><span className="eyebrow">PANIER</span><h2>Votre sélection</h2></div><button className="close" onClick={()=>setCartOpen(false)}>×</button></div>{!cart.length?<div className="empty"><p>Votre panier est vide.</p><button className="button" onClick={()=>{setCartOpen(false);document.getElementById('shop')?.scrollIntoView()}}>Découvrir le shop</button></div>:<><div className="cart-list">{cart.map(x=><div className="cart-line" key={x.product.id}><div className="cart-thumb" style={{background:x.product.image}}></div><div className="cart-line-info"><strong>{x.product.name}</strong><small>{x.product.artist}</small><div className="qty"><button onClick={()=>change(x.product.id,-1)}>−</button><span>{x.qty}</span><button onClick={()=>change(x.product.id,1)}>+</button></div></div><b>{euro(x.product.price*x.qty)}</b></div>)}</div><div className="cart-total"><span>Sous-total</span><strong>{euro(total)}</strong></div><button className="button dark full">Passer commande</button><small className="cart-note">Paiement et checkout Shopify seront branchés à l’étape suivante.</small></>}</aside></div>}
-
-    {search&&<div className="overlay search-overlay" onClick={()=>setSearch(false)}><div className="search-box" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setSearch(false)}>×</button><span className="eyebrow">RECHERCHE</span><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Artiste, création, région..." />{query&&<div className="results">{filtered.map(p=><button key={p.id} onClick={()=>{setSelected(p);setSearch(false)}}><span>{p.name}</span><small>{p.artist} · {p.region}</small></button>)}{!filtered.length&&<p>Aucun résultat.</p>}</div>}</div></div>}
+    {searchOpen&&<div className="overlay search-overlay" onClick={()=>setSearchOpen(false)}><div className="search-box" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setSearchOpen(false)}>×</button><span className="eyebrow">RECHERCHE</span><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher un pack..." />{query&&<div className="results">{results.map(p=><button key={p.id} onClick={()=>{setSearchOpen(false);add(p)}}><span>{p.label}</span><small>{p.sub} · {euro(p.price)}</small></button>)}{!results.length&&<p>Aucun résultat.</p>}</div>}</div></div>}
   </div>
 }
 createRoot(document.getElementById('root')!).render(<App/>);
