@@ -1,6 +1,12 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import catalogImage from './assets/touteslesimagesenunseulfichier.png';
+import heroImage from './assets/hero.png';
+import pack3Image from './assets/pack-3.png';
+import pack6Image from './assets/pack-6.png';
+import pack10Image from './assets/pack-10.png';
+import pack20Image from './assets/pack-20.png';
+import pack50Image from './assets/pack-50.png';
+import pack100Image from './assets/pack-100.png';
 import './styles.css';
 
 type Pack={id:number;qty:number;price:number;label:string;sub:string;accent:string;pattern:string;free?:string};
@@ -16,9 +22,21 @@ const packs:Pack[]=[
 
 const euro=(n:number)=>n.toFixed(2).replace('.',',')+' €';
 
+const packImages:Record<number,string>={
+  1:pack3Image,
+  2:pack6Image,
+  3:pack10Image,
+  4:pack20Image,
+  5:pack50Image,
+  6:pack100Image
+};
+
 function PackArt({pack,hero=false}:{pack:Pack;hero?:boolean}){
-  if(hero)return <div className="hero-photo" style={{backgroundImage:'url('+catalogImage+')'}} aria-label="Étuis PAQPAQ de démonstration"/>;
-  return <div className={'pack-art image-pack image-pack-'+pack.id} style={{backgroundImage:'url('+catalogImage+')'}} aria-label={pack.label+' PAQPAQ'}>{pack.free&&<b className="free-badge">+1<small>OFFERT</small></b>}</div>;
+  if(hero)return <div className="hero-photo"><img src={heroImage} alt="Étuis PAQPAQ de démonstration"/></div>;
+  return <div className="pack-art image-pack" aria-label={pack.label+' PAQPAQ'}>
+    <img src={packImages[pack.id]} alt={pack.label+' PAQPAQ'}/>
+    {pack.free&&<b className="free-badge">+1<small>OFFERT</small></b>}
+  </div>;
 }
 
 function ProductCard({pack,onAdd}:{pack:Pack;onAdd:(p:Pack)=>void}){
