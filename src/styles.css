@@ -65,3 +65,32 @@
   .pack-card:nth-child(5) .image-pack img{height:138%;transform:translate(46%,-13%)}
   .pack-card:nth-child(6) .image-pack img{height:126%;transform:translate(64%,-8%)}
 }
+
+/* Use the uploaded asset files at their native proportions — no sprite, crop, zoom or offset. */
+.pack-art.image-pack{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.pack-art.image-pack img{
+  display:block;
+  width:auto !important;
+  height:auto !important;
+  max-width:100% !important;
+  max-height:100% !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  transform:none !important;
+}
+.hero-photo img{
+  width:auto !important;
+  height:auto !important;
+  max-width:100% !important;
+  max-height:100% !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  transform:none !important;
+}
