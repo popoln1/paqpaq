@@ -35,7 +35,7 @@ function PackArt({pack,hero=false}:{pack:Pack;hero?:boolean}){
   if(hero)return <div className="hero-photo"><img src={heroImage} alt="Étuis PAQPAQ de démonstration"/></div>;
   return <div className="pack-art image-pack" aria-label={pack.label+' PAQPAQ'}>
     <img src={packImages[pack.id]} alt={pack.label+' PAQPAQ'}/>
-    {pack.free&&<b className="free-badge">+1<small>OFFERT</small></b>}
+    
   </div>;
 }
 
