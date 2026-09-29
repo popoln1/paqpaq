@@ -45,3 +45,23 @@
 @media(max-width:850px){
   .hero-photo{min-height:250px}
 }
+
+/* Final image framing: each source artwork contains its own photographic margins. */
+.pack-art.image-pack{display:grid;place-items:center;overflow:hidden;}
+.pack-art.image-pack img{width:auto;height:100%;max-width:none;object-fit:contain;transform-origin:center center;}
+.image-pack:nth-child(1) img{}
+.pack-card:nth-child(1) .image-pack img{height:183%;transform:translate(42%,-30%)}
+.pack-card:nth-child(2) .image-pack img{height:152%;transform:translate(62%,-24%)}
+.pack-card:nth-child(3) .image-pack img{height:130%;transform:translate(80%,-13%)}
+.pack-card:nth-child(4) .image-pack img{height:155%;transform:translate(57%,-24%)}
+.pack-card:nth-child(5) .image-pack img{height:138%;transform:translate(46%,-13%)}
+.pack-card:nth-child(6) .image-pack img{height:126%;transform:translate(64%,-8%)}
+.hero-photo img{width:auto;height:125%;max-width:none;transform:translateY(-3%);}
+@media(max-width:850px){
+  .pack-card:nth-child(1) .image-pack img{height:183%;transform:translate(42%,-30%)}
+  .pack-card:nth-child(2) .image-pack img{height:152%;transform:translate(62%,-24%)}
+  .pack-card:nth-child(3) .image-pack img{height:130%;transform:translate(80%,-13%)}
+  .pack-card:nth-child(4) .image-pack img{height:155%;transform:translate(57%,-24%)}
+  .pack-card:nth-child(5) .image-pack img{height:138%;transform:translate(46%,-13%)}
+  .pack-card:nth-child(6) .image-pack img{height:126%;transform:translate(64%,-8%)}
+}
