@@ -39,12 +39,37 @@ function PackArt({pack,hero=false}:{pack:Pack;hero?:boolean}){
   </div>;
 }
 
-function ProductCard({pack,onAdd}:{pack:Pack;onAdd:(p:Pack)=>void}){
-  return <article className="pack-card">
+const packDescriptions:Record<number,string[]> = {
+  1:['Le pack idéal pour découvrir PAQPAQ.','3 étuis pour faire un premier essai.','Trois créations différentes à collectionner.','Un petit format, facile à offrir.','Parfait pour découvrir nos artistes.','Le pack le plus accessible.','Choisissez vos premiers PAQPAQ.'],
+  2:['Le bon format pour commencer une collection.','6 étuis pour varier les créations.','Découvrez plusieurs univers artistiques.','Gardez vos préférés et partagez les autres.','Un format équilibré pour se faire plaisir.','Plus de créations, sans trop stocker.','Passez à 6 et laissez-vous surprendre.'],
+  3:['Le pack pensé pour vraiment profiter de la collection.','10 étuis au total, dont 1 offert.','Plus de créations à découvrir et à partager.','Idéal pour varier les modèles au quotidien.','Un format généreux sans passer au gros stock.','9 étuis achetés, le 10e est offert.','Le choix naturel pour une collection complète.'],
+  4:['Un pack pour ceux qui veulent avoir du choix.','20 étuis pour constituer une belle réserve.','Gardez-en pour vous et partagez autour de vous.','Idéal pour les soirées et les cadeaux.','Plus de créations, plus de possibilités.','Un format confortable pour plusieurs semaines.','Faites votre stock sans passer au maximum.'],
+  5:['Un grand pack pour les vrais amateurs de PAQPAQ.','50 étuis pour constituer une belle collection.','Idéal pour offrir à vos proches ou amis.','Gardez vos favoris toujours à portée de main.','Un format pensé pour partager largement.','Plus de quantité, plus de variété.','Le stock généreux pour ne jamais manquer.'],
+  6:['Le pack pour faire le plein pour l’année.','100 étuis pour constituer un vrai stock.','Idéal pour offrir régulièrement autour de vous.','Parfait pour les événements et les grandes occasions.','Découvrez une grande variété de créations.','Le format pensé pour les gros besoins.','Faites votre réserve et partagez PAQPAQ.']
+};
+
+function ProductCard({pack,onOpen}:{pack:Pack;onOpen:(p:Pack)=>void}){
+  return <article className="pack-card" onClick={()=>onOpen(pack)} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==='Enter'||e.key===' ')onOpen(pack)}}>
     <div className="pack-image"><PackArt pack={pack}/></div>
     <div className="pack-info"><div><h3>{pack.label}{pack.free&&<small> (9 + 1 OFFERT)</small>}</h3><p>{pack.sub}</p></div><strong>{euro(pack.price)}</strong></div>
-    <button className="add-button" onClick={()=>onAdd(pack)}>AJOUTER AU PANIER <span>→</span></button>
+    <button className="add-button" onClick={e=>{e.stopPropagation();onOpen(pack)}}>VOIR LE PACK <span>→</span></button>
   </article>
+}
+
+function ProductModal({pack,onClose,onAdd}:{pack:Pack;onClose:()=>void;onAdd:(p:Pack)=>void}){
+  return <div className="product-modal-overlay" onClick={onClose}>
+    <section className="product-modal" onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-label={pack.label}>
+      <button className="product-modal-close" onClick={onClose} aria-label="Fermer">×</button>
+      <div className="product-modal-image"><img src={packImages[pack.id]} alt={pack.label+' PAQPAQ'}/></div>
+      <div className="product-modal-content">
+        <span className="eyebrow">PAQPAQ · {pack.qty} ÉTUIS</span>
+        <h2>{pack.label}</h2>
+        <div className="product-modal-price">{euro(pack.price)}</div>
+        <div className="product-modal-copy">{packDescriptions[pack.id].map((line,i)=><p key={i}>{line}</p>)}</div>
+        <button className="product-modal-action" onClick={()=>onAdd(pack)}>AJOUTER AU PANIER <span>→</span></button>
+      </div>
+    </section>
+  </div>
 }
 
 function App(){
@@ -53,6 +78,7 @@ function App(){
   const [searchOpen,setSearchOpen]=React.useState(false);
   const [query,setQuery]=React.useState('');
   const [menu,setMenu]=React.useState(false);
+  const [selectedPack,setSelectedPack]=React.useState<Pack|null>(null);
 
   const add=(pack:Pack)=>{
     setCart(items=>items.some(x=>x.pack.id===pack.id)
@@ -97,9 +123,9 @@ function App(){
 
       <section id="packs" className="packs-section">
         <div className="section-label"><h2>LES PACKS LES MOINS CHERS</h2><span>PETITS PRIX, GRAND PLAISIR</span></div>
-        <div className="pack-grid">{packs.slice(0,3).map(p=><ProductCard key={p.id} pack={p} onAdd={add}/>)}</div>
+        <div className="pack-grid">{packs.slice(0,3).map(p=><ProductCard key={p.id} pack={p} onOpen={setSelectedPack}/>)}</div>
         <div className="section-label second"><h2>LES PACKS LES PLUS CHERS</h2><span>PLUS DE CRÉATIONS, PLUS D'ÉCONOMIES</span></div>
-        <div className="pack-grid">{packs.slice(3).map(p=><ProductCard key={p.id} pack={p} onAdd={add}/>)}</div>
+        <div className="pack-grid">{packs.slice(3).map(p=><ProductCard key={p.id} pack={p} onOpen={setSelectedPack}/>)}</div>
       </section>
 
       <section className="trust">
@@ -122,6 +148,8 @@ function App(){
       {!cart.length?<div className="empty"><p>Votre panier est vide.</p><button className="hero-button" onClick={()=>{setCartOpen(false);document.getElementById('packs')?.scrollIntoView()}}>Découvrir les packs</button></div>:
       <><div className="cart-list">{cart.map(x=><div className="cart-line" key={x.pack.id}><div className="cart-mini"><PackArt pack={x.pack}/></div><div className="cart-line-info"><strong>{x.pack.label}</strong><small>{x.pack.sub}</small><div className="qty"><button onClick={()=>change(x.pack.id,-1)}>−</button><span>{x.qty}</span><button onClick={()=>change(x.pack.id,1)}>+</button></div></div><b>{euro(x.pack.price*x.qty)}</b></div>)}</div><div className="cart-total"><span>Sous-total</span><strong>{euro(total)}</strong></div><button className="checkout">PASSER COMMANDE →</button><small className="cart-note">Le paiement Shopify sera connecté ensuite.</small></>}
     </aside></div>}
+
+    {selectedPack&&<ProductModal pack={selectedPack} onClose={()=>setSelectedPack(null)} onAdd={p=>{setSelectedPack(null);add(p)}}/>}
 
     {searchOpen&&<div className="overlay search-overlay" onClick={()=>setSearchOpen(false)}><div className="search-box" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setSearchOpen(false)}>×</button><span className="eyebrow">RECHERCHE</span><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher un pack..." />{query&&<div className="results">{results.map(p=><button key={p.id} onClick={()=>{setSearchOpen(false);add(p)}}><span>{p.label}</span><small>{p.sub} · {euro(p.price)}</small></button>)}{!results.length&&<p>Aucun résultat.</p>}</div>}</div></div>}
   </div>
