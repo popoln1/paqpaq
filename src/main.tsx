@@ -84,22 +84,15 @@ function App(){
   const [menu,setMenu]=React.useState(false);
   const [selectedPack,setSelectedPack]=React.useState<Pack|null>(null);
   const [checkoutOpen,setCheckoutOpen]=React.useState(false);
-  const [toast,setToast]=React.useState('');
-  const [cartLoading,setCartLoading]=React.useState(false);
 
   const add=(pack:Pack)=>{
     setCart(items=>items.some(x=>x.pack.id===pack.id)
       ?items.map(x=>x.pack.id===pack.id?{...x,qty:x.qty+1}:x)
       :[...items,{pack,qty:1}]);
-    setToast(pack.label+' ajouté au panier');
-    window.setTimeout(()=>setToast(''),2200);
+    setCartOpen(true);
   };
   const openCart=()=>{
-    setCartLoading(true);
-    window.setTimeout(()=>{
-      setCartLoading(false);
-      setCartOpen(true);
-    },550);
+    if(count>0) setCartOpen(true);
   };
   const buyNow=(pack:Pack)=>{
     setCart(items=>items.some(x=>x.pack.id===pack.id)
@@ -124,7 +117,7 @@ function App(){
       </nav>
       <div className="nav-actions">
         <button onClick={()=>setSearchOpen(true)} aria-label="Rechercher">⌕</button>
-        <button className="cart-button" onClick={openCart}>PANIER <span>{count}</span></button>
+        <button className="cart-button" onClick={openCart} disabled={count===0} aria-disabled={count===0}>PANIER <span>{count}</span></button>
       </div>
     </header>
 
@@ -164,12 +157,11 @@ function App(){
       <div className="newsletter"><strong>RESTEZ INFORMÉ</strong><div><input placeholder="Votre email"/><button>→</button></div></div>
     </footer>
 
-    {cartLoading&&<div className="cart-loading-overlay"><div className="cart-loading"><div className="paqpaq-loader"><span>P</span><span>A</span><span>Q</span><span>P</span><span>A</span><span>Q</span></div><small>OUVERTURE DU PANIER</small></div></div>}
-
     {cartOpen&&<div className="overlay" onClick={()=>setCartOpen(false)}><aside className="cart-drawer" onClick={e=>e.stopPropagation()}>
       <div className="drawer-head"><div><span className="eyebrow">PANIER</span><h2>Votre sélection</h2></div><button className="close" onClick={()=>setCartOpen(false)}>×</button></div>
       {!cart.length?<div className="empty"><p>Votre panier est vide.</p><button className="hero-button" onClick={()=>{setCartOpen(false);document.getElementById('packs')?.scrollIntoView()}}>Découvrir les packs</button></div>:
       <><div className="cart-list">{cart.map(x=><div className="cart-line" key={x.pack.id}><div className="cart-mini"><PackArt pack={x.pack}/></div><div className="cart-line-info"><strong>{x.pack.label}</strong><small>{x.pack.sub}</small><div className="qty"><button onClick={()=>change(x.pack.id,-1)}>−</button><span>{x.qty}</span><button onClick={()=>change(x.pack.id,1)}>+</button></div></div><b>{euro(x.pack.price*x.qty)}</b></div>)}</div><div className="cart-total"><span>Sous-total</span><strong>{euro(total)}</strong></div><button className="checkout" onClick={()=>{setCartOpen(false);setCheckoutOpen(true)}}>PASSER AU PAIEMENT →</button>
+       <button className="continue-shopping" onClick={()=>{setCartOpen(false);document.getElementById('packs')?.scrollIntoView({behavior:'smooth'})}}>CONTINUER LES ACHATS</button>
        <div className="cart-inspiration"><strong>PAQPAQ, c’est aussi une collection.</strong><span>Découvrez d’autres créations avant de finaliser.</span><div>{[1,3,6].map(id=><img key={id} src={packImages[id]} alt="" />)}</div></div></>}
     </aside></div>}
 
@@ -197,8 +189,6 @@ function App(){
         </div>
       </section>
     </div>}
-
-    {toast&&<div className="cart-toast">{toast}<button onClick={openCart}>VOIR LE PANIER</button></div>}
 
     {searchOpen&&<div className="overlay search-overlay" onClick={()=>setSearchOpen(false)}><div className="search-box" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setSearchOpen(false)}>×</button><span className="eyebrow">RECHERCHE</span><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher un pack..." />{query&&<div className="results">{results.map(p=><button key={p.id} onClick={()=>{setSearchOpen(false);add(p)}}><span>{p.label}</span><small>{p.sub} · {euro(p.price)}</small></button>)}{!results.length&&<p>Aucun résultat.</p>}</div>}</div></div>}
   </div>
