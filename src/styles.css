@@ -233,3 +233,88 @@
     right:12px;
   }
 }
+
+
+/* Conversion-focused pack information */
+.pack-price{
+  min-width:82px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:3px;
+}
+.pack-price strong{font-size:17px}
+.pack-price small{font-size:8px;opacity:.52}
+.featured-pack{
+  position:relative;
+}
+.featured-pack:before{
+  content:"LE PLUS CHOISI";
+  position:absolute;
+  top:-9px;
+  left:18px;
+  z-index:10;
+  background:#111;
+  color:#fff;
+  border-radius:12px;
+  padding:5px 9px;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.8px;
+}
+.product-modal-benefit{
+  display:inline-flex;
+  width:max-content;
+  max-width:100%;
+  background:#111;
+  color:#fff;
+  border-radius:18px;
+  padding:7px 11px;
+  font-size:8px;
+  font-weight:850;
+  letter-spacing:.4px;
+  margin-bottom:12px;
+}
+.product-modal-price{
+  display:flex;
+  align-items:baseline;
+  gap:9px;
+  margin-bottom:22px;
+}
+.product-modal-price strong{
+  font-size:24px;
+}
+.product-modal-price span{
+  font-size:10px;
+  opacity:.52;
+}
+.product-modal-secondary{
+  width:100%;
+  margin-top:9px;
+  min-height:38px;
+  border:1px solid #d4d0c8;
+  border-radius:22px;
+  background:transparent;
+  color:#111;
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.5px;
+  cursor:pointer;
+}
+.product-modal-action:hover,
+.product-modal-secondary:hover{
+  transform:translateY(-1px);
+}
+@media(max-width:850px){
+  .featured-pack:before{
+    top:-8px;
+    left:14px;
+  }
+  .pack-price{
+    min-width:76px;
+  }
+  .pack-price strong{font-size:16px}
+  .product-modal-benefit{
+    font-size:7px;
+  }
+}
