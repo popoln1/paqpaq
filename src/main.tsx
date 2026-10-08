@@ -85,12 +85,28 @@ function App(){
   const [selectedPack,setSelectedPack]=React.useState<Pack|null>(null);
   const [checkoutOpen,setCheckoutOpen]=React.useState(false);
   const [toast,setToast]=React.useState('');
+  const [cartLoading,setCartLoading]=React.useState(false);
 
   const add=(pack:Pack)=>{
     setCart(items=>items.some(x=>x.pack.id===pack.id)
       ?items.map(x=>x.pack.id===pack.id?{...x,qty:x.qty+1}:x)
       :[...items,{pack,qty:1}]);
-    setCartOpen(true);
+    setToast(pack.label+' ajouté au panier');
+    window.setTimeout(()=>setToast(''),2200);
+  };
+  const openCart=()=>{
+    setCartLoading(true);
+    window.setTimeout(()=>{
+      setCartLoading(false);
+      setCartOpen(true);
+    },550);
+  };
+  const buyNow=(pack:Pack)=>{
+    setCart(items=>items.some(x=>x.pack.id===pack.id)
+      ?items.map(x=>x.pack.id===pack.id?{...x,qty:x.qty+1}:x)
+      :[...items,{pack,qty:1}]);
+    setSelectedPack(null);
+    setCheckoutOpen(true);
   };
   const change=(id:number,delta:number)=>setCart(items=>items.map(x=>x.pack.id===id?{...x,qty:Math.max(0,x.qty+delta)}:x).filter(x=>x.qty>0));
   const count=cart.reduce((n,x)=>n+x.qty,0);
