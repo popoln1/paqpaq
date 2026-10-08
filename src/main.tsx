@@ -108,7 +108,7 @@ function App(){
       </nav>
       <div className="nav-actions">
         <button onClick={()=>setSearchOpen(true)} aria-label="Rechercher">⌕</button>
-        <button className="cart-button" onClick={()=>setCartOpen(true)}>PANIER <span>{count}</span></button>
+        <button className="cart-button" onClick={openCart}>PANIER <span>{count}</span></button>
       </div>
     </header>
 
@@ -148,6 +148,8 @@ function App(){
       <div className="newsletter"><strong>RESTEZ INFORMÉ</strong><div><input placeholder="Votre email"/><button>→</button></div></div>
     </footer>
 
+    {cartLoading&&<div className="cart-loading-overlay"><div className="cart-loading"><div className="paqpaq-loader"><span>P</span><span>A</span><span>Q</span><span>P</span><span>A</span><span>Q</span></div><small>OUVERTURE DU PANIER</small></div></div>}
+
     {cartOpen&&<div className="overlay" onClick={()=>setCartOpen(false)}><aside className="cart-drawer" onClick={e=>e.stopPropagation()}>
       <div className="drawer-head"><div><span className="eyebrow">PANIER</span><h2>Votre sélection</h2></div><button className="close" onClick={()=>setCartOpen(false)}>×</button></div>
       {!cart.length?<div className="empty"><p>Votre panier est vide.</p><button className="hero-button" onClick={()=>{setCartOpen(false);document.getElementById('packs')?.scrollIntoView()}}>Découvrir les packs</button></div>:
@@ -180,7 +182,7 @@ function App(){
       </section>
     </div>}
 
-    {toast&&<div className="cart-toast">{toast}<button onClick={()=>setCartOpen(true)}>VOIR LE PANIER</button></div>}
+    {toast&&<div className="cart-toast">{toast}<button onClick={openCart}>VOIR LE PANIER</button></div>}
 
     {searchOpen&&<div className="overlay search-overlay" onClick={()=>setSearchOpen(false)}><div className="search-box" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setSearchOpen(false)}>×</button><span className="eyebrow">RECHERCHE</span><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher un pack..." />{query&&<div className="results">{results.map(p=><button key={p.id} onClick={()=>{setSearchOpen(false);add(p)}}><span>{p.label}</span><small>{p.sub} · {euro(p.price)}</small></button>)}{!results.length&&<p>Aucun résultat.</p>}</div>}</div></div>}
   </div>
