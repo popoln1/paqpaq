@@ -58,7 +58,7 @@ function ProductCard({pack,onOpen}:{pack:Pack;onOpen:(p:Pack)=>void}){
   </article>
 }
 
-function ProductModal({pack,onClose,onAdd}:{pack:Pack;onClose:()=>void;onAdd:(p:Pack)=>void}){
+function ProductModal({pack,onClose,onAdd,onBuy}:{pack:Pack;onClose:()=>void;onAdd:(p:Pack)=>void;onBuy:(p:Pack)=>void}){
   return <div className="product-modal-overlay" onClick={onClose}>
     <section className="product-modal" onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-label={pack.label}>
       <button className="product-modal-close" onClick={onClose} aria-label="Fermer">×</button>
@@ -69,8 +69,8 @@ function ProductModal({pack,onClose,onAdd}:{pack:Pack;onClose:()=>void;onAdd:(p:
         <h2>{pack.label}</h2>
         <div className="product-modal-price"><strong>{euro(pack.price)}</strong><span>{euro(unitPrice(pack))} / étui</span></div>
         <div className="product-modal-copy">{packDescriptions[pack.id].map((line,i)=><p key={i}>{line}</p>)}</div>
-        <button className="product-modal-action" onClick={()=>onAdd(pack)}>AJOUTER AU PANIER <span>→</span></button>
-        <button className="product-modal-secondary" onClick={onClose}>CONTINUER MES ACHATS</button>
+        <button className="product-modal-action" onClick={()=>onBuy(pack)}>ACHETER MAINTENANT <span>→</span></button>
+        <button className="product-modal-secondary" onClick={()=>onAdd(pack)}>AJOUTER AU PANIER</button>
       </div>
     </section>
   </div>
@@ -83,6 +83,8 @@ function App(){
   const [query,setQuery]=React.useState('');
   const [menu,setMenu]=React.useState(false);
   const [selectedPack,setSelectedPack]=React.useState<Pack|null>(null);
+  const [checkoutOpen,setCheckoutOpen]=React.useState(false);
+  const [toast,setToast]=React.useState('');
 
   const add=(pack:Pack)=>{
     setCart(items=>items.some(x=>x.pack.id===pack.id)
@@ -126,9 +128,8 @@ function App(){
       </section>
 
       <section id="packs" className="packs-section">
-        <div className="section-label"><h2>LES PACKS LES MOINS CHERS</h2><span>PETITS PRIX, GRAND PLAISIR</span></div>
+        <div className="section-label"><h2>CHOISISSEZ VOTRE PACK</h2><span>3 À 100 ÉTUIS</span></div>
         <div className="pack-grid">{packs.slice(0,3).map(p=><ProductCard key={p.id} pack={p} onOpen={setSelectedPack}/>)}</div>
-        <div className="section-label second"><h2>LES PACKS LES PLUS CHERS</h2><span>PLUS DE CRÉATIONS, PLUS D'ÉCONOMIES</span></div>
         <div className="pack-grid">{packs.slice(3).map(p=><ProductCard key={p.id} pack={p} onOpen={setSelectedPack}/>)}</div>
       </section>
 
@@ -150,10 +151,36 @@ function App(){
     {cartOpen&&<div className="overlay" onClick={()=>setCartOpen(false)}><aside className="cart-drawer" onClick={e=>e.stopPropagation()}>
       <div className="drawer-head"><div><span className="eyebrow">PANIER</span><h2>Votre sélection</h2></div><button className="close" onClick={()=>setCartOpen(false)}>×</button></div>
       {!cart.length?<div className="empty"><p>Votre panier est vide.</p><button className="hero-button" onClick={()=>{setCartOpen(false);document.getElementById('packs')?.scrollIntoView()}}>Découvrir les packs</button></div>:
-      <><div className="cart-list">{cart.map(x=><div className="cart-line" key={x.pack.id}><div className="cart-mini"><PackArt pack={x.pack}/></div><div className="cart-line-info"><strong>{x.pack.label}</strong><small>{x.pack.sub}</small><div className="qty"><button onClick={()=>change(x.pack.id,-1)}>−</button><span>{x.qty}</span><button onClick={()=>change(x.pack.id,1)}>+</button></div></div><b>{euro(x.pack.price*x.qty)}</b></div>)}</div><div className="cart-total"><span>Sous-total</span><strong>{euro(total)}</strong></div><button className="checkout">PASSER COMMANDE →</button><small className="cart-note">Le paiement Shopify sera connecté ensuite.</small></>}
+      <><div className="cart-list">{cart.map(x=><div className="cart-line" key={x.pack.id}><div className="cart-mini"><PackArt pack={x.pack}/></div><div className="cart-line-info"><strong>{x.pack.label}</strong><small>{x.pack.sub}</small><div className="qty"><button onClick={()=>change(x.pack.id,-1)}>−</button><span>{x.qty}</span><button onClick={()=>change(x.pack.id,1)}>+</button></div></div><b>{euro(x.pack.price*x.qty)}</b></div>)}</div><div className="cart-total"><span>Sous-total</span><strong>{euro(total)}</strong></div><button className="checkout" onClick={()=>{setCartOpen(false);setCheckoutOpen(true)}}>PASSER AU PAIEMENT →</button>
+       <div className="cart-inspiration"><strong>PAQPAQ, c’est aussi une collection.</strong><span>Découvrez d’autres créations avant de finaliser.</span><div>{[1,3,6].map(id=><img key={id} src={packImages[id]} alt="" />)}</div></div></>}
     </aside></div>}
 
-    {selectedPack&&<ProductModal pack={selectedPack} onClose={()=>setSelectedPack(null)} onAdd={p=>{setSelectedPack(null);add(p)}}/>}
+    {selectedPack&&<ProductModal pack={selectedPack} onClose={()=>setSelectedPack(null)} onAdd={p=>{setSelectedPack(null);add(p)}} onBuy={buyNow}/>}
+
+
+
+    {checkoutOpen&&<div className="checkout-overlay">
+      <section className="checkout-page" role="dialog" aria-modal="true" aria-label="Paiement">
+        <div className="checkout-top"><button className="checkout-back" onClick={()=>setCheckoutOpen(false)}>← RETOUR</button><div className="logo">PAQPAQ<span>®</span></div><button className="close" onClick={()=>setCheckoutOpen(false)}>×</button></div>
+        <div className="checkout-layout">
+          <div className="checkout-summary">
+            <span className="eyebrow">VOTRE COMMANDE</span><h2>Finalisez votre achat</h2>
+            <div className="checkout-lines">{cart.map(x=><div className="checkout-line" key={x.pack.id}><div className="checkout-line-image"><img src={packImages[x.pack.id]} alt=""/></div><div><strong>{x.pack.label}</strong><small>{x.qty} pack{x.qty>1?'s':''} · {x.pack.qty*x.qty} étuis</small></div><b>{euro(x.pack.price*x.qty)}</b></div>)}</div>
+            <div className="checkout-total"><span>Total</span><strong>{euro(total)}</strong></div>
+          </div>
+          <div className="checkout-form">
+            <span className="eyebrow">PAIEMENT</span><h3>Vos informations</h3>
+            <label>Email<input type="email" placeholder="vous@email.com"/></label>
+            <label>Nom complet<input type="text" placeholder="Votre nom"/></label>
+            <label>Adresse de livraison<input type="text" placeholder="Votre adresse"/></label>
+            <button className="checkout-pay">CONTINUER VERS LE PAIEMENT <span>→</span></button>
+            <small>Le paiement sécurisé sera connecté avec Shopify lors de la mise en ligne.</small>
+          </div>
+        </div>
+      </section>
+    </div>}
+
+    {toast&&<div className="cart-toast">{toast}<button onClick={()=>setCartOpen(true)}>VOIR LE PANIER</button></div>}
 
     {searchOpen&&<div className="overlay search-overlay" onClick={()=>setSearchOpen(false)}><div className="search-box" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setSearchOpen(false)}>×</button><span className="eyebrow">RECHERCHE</span><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher un pack..." />{query&&<div className="results">{results.map(p=><button key={p.id} onClick={()=>{setSearchOpen(false);add(p)}}><span>{p.label}</span><small>{p.sub} · {euro(p.price)}</small></button>)}{!results.length&&<p>Aucun résultat.</p>}</div>}</div></div>}
   </div>
