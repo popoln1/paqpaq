@@ -21,6 +21,8 @@ const packs:Pack[]=[
 ];
 
 const euro=(n:number)=>n.toFixed(2).replace('.',',')+' €';
+const unitPrice=(pack:Pack)=>pack.price/pack.qty;
+const packBenefits:Record<number,string>={1:'Pour découvrir PAQPAQ',2:'Pour commencer une collection',3:'Le format le plus équilibré',4:'Pour avoir du choix',5:'Pour partager et offrir',6:'Pour faire le stock pour l’année'};
 
 const packImages:Record<number,string>={
   1:pack3Image,
@@ -49,9 +51,9 @@ const packDescriptions:Record<number,string[]> = {
 };
 
 function ProductCard({pack,onOpen}:{pack:Pack;onOpen:(p:Pack)=>void}){
-  return <article className="pack-card" onClick={()=>onOpen(pack)} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==='Enter'||e.key===' ')onOpen(pack)}}>
+  return <article className={pack.id===3?'pack-card featured-pack':'pack-card'} onClick={()=>onOpen(pack)} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==='Enter'||e.key===' ')onOpen(pack)}}>
     <div className="pack-image"><PackArt pack={pack}/></div>
-    <div className="pack-info"><div><h3>{pack.label}{pack.free&&<small> (9 + 1 OFFERT)</small>}</h3><p>{pack.sub}</p></div><strong>{euro(pack.price)}</strong></div>
+    <div className="pack-info"><div><h3>{pack.label}{pack.free&&<small> (9 + 1 OFFERT)</small>}</h3><p>{pack.sub}</p></div><div className="pack-price"><strong>{euro(pack.price)}</strong><small>{euro(unitPrice(pack))} / étui</small></div></div>
     <button className="add-button" onClick={e=>{e.stopPropagation();onOpen(pack)}}>VOIR LE PACK <span>→</span></button>
   </article>
 }
@@ -63,10 +65,12 @@ function ProductModal({pack,onClose,onAdd}:{pack:Pack;onClose:()=>void;onAdd:(p:
       <div className="product-modal-image"><img src={packImages[pack.id]} alt={pack.label+' PAQPAQ'}/></div>
       <div className="product-modal-content">
         <span className="eyebrow">PAQPAQ · {pack.qty} ÉTUIS</span>
+        <div className="product-modal-benefit">{packBenefits[pack.id]}{pack.free&&' · 1 offert'}</div>
         <h2>{pack.label}</h2>
-        <div className="product-modal-price">{euro(pack.price)}</div>
+        <div className="product-modal-price"><strong>{euro(pack.price)}</strong><span>{euro(unitPrice(pack))} / étui</span></div>
         <div className="product-modal-copy">{packDescriptions[pack.id].map((line,i)=><p key={i}>{line}</p>)}</div>
         <button className="product-modal-action" onClick={()=>onAdd(pack)}>AJOUTER AU PANIER <span>→</span></button>
+        <button className="product-modal-secondary" onClick={onClose}>CONTINUER MES ACHATS</button>
       </div>
     </section>
   </div>
